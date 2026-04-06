@@ -1,0 +1,132 @@
+﻿@page "/tasktracker"
+@using TaskTrackerApp
+
+<h3>Task Tracker</h3>
+
+
+<div class="mb-3">
+    <input type="text" class="form-control d-inline-block w-50 me-2"
+           placeholder="Enter task title"
+           @bind="newTaskTitle" />
+
+    <input type="date" class="form-control d-inline-block w-25 me-2"
+           @bind="newTaskDueDate" />
+
+    <button class="btn btn-primary" @onclick="AddTask">Add</button>
+</div>
+
+@if (!string.IsNullOrEmpty(validationMessage))
+{
+    <div class="text-danger mb-2">@validationMessage</div>
+}
+
+
+<div class="mb-2">
+    <button class="btn btn-secondary me-2" @onclick='() => FilterTasks("All")'>All</button>
+    <button class="btn btn-success me-2" @onclick='() => FilterTasks("Completed")'>Completed</button>
+    <button class="btn btn-warning" @onclick='() => FilterTasks("Active")'>Active</button>
+</div>
+
+<p>Active Tasks: @ActiveCount</p>
+
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Completed</th>
+            <th>Title</th>
+            <th>Start Date</th>
+            <th>Due Date</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in filteredTasks)
+        {
+            <tr>
+                <td>
+                    <input type="checkbox" @bind="task.IsCompleted" />
+                </td>
+                <td>@task.Title</td>
+                <td>@task.StartDate</td>
+                <td>@task.DueDate</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" @onclick="() => DeleteTask(task)">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    
+    private string newTaskTitle=string.Empty;
+    private DateTime? newTaskDueDate; 
+    private string validationMessage=string.Empty;
+
+    
+    private List<TaskItem> tasks = new();
+    private List<TaskItem> filteredTasks = new();
+
+    private string currentFilter = "All";
+
+    protected override void OnInitialized()
+    {
+        filteredTasks = tasks;
+    }
+
+    
+    private void AddTask()
+    {
+        if (string.IsNullOrWhiteSpace(newTaskTitle) || newTaskDueDate == null)
+        {
+            validationMessage = "Please enter both title and due date!";
+            return;
+        }
+
+        var task = new TaskItem
+        {
+            Title = newTaskTitle,
+            StartDate = DateTime.Now.ToString("yyyy-MM-dd"),
+            DueDate = newTaskDueDate.Value.ToString("yyyy-MM-dd"),
+            IsCompleted = false
+        };
+
+        tasks.Add(task);
+
+       
+        newTaskTitle = "";
+        newTaskDueDate = null;
+        validationMessage = "";
+
+        ApplyFilter();
+    }
+
+   
+    private void DeleteTask(TaskItem task)
+    {
+        tasks.Remove(task);
+        ApplyFilter();
+    }
+
+    
+    private void FilterTasks(string filter)
+    {
+        currentFilter = filter;
+        ApplyFilter();
+    }
+
+   
+    private void ApplyFilter()
+    {
+        filteredTasks = currentFilter switch
+        {
+            "Completed" => tasks.Where(t => t.IsCompleted).ToList(),
+            "Active" => tasks.Where(t => !t.IsCompleted).ToList(),
+            _ => tasks.ToList()
+        };
+    }
+
+    
+    private int ActiveCount => tasks.Count(t => !t.IsCompleted);
+}

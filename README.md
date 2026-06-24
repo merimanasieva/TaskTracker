@@ -35,3 +35,7 @@ Each task contains:
 ## Data Storage
 
 The application uses an **in-memory list** without a database.
+
+## About
+
+This project was created to practice Blazor components, C# programming, and building a simple task management application.

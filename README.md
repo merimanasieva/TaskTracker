@@ -35,10 +35,3 @@ Each task contains:
 ## Data Storage
 
 The application uses an **in-memory list** without a database.
-
-## Run the Project
-
-Clone the repository:
-
-```bash
-git clone https://github.com/merimanasieva/TaskTracker.git
